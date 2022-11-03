@@ -52,13 +52,21 @@ target_link_libraries(minisat-lib-static ${ZLIB_LIBRARY})
 
 add_executable(minisat_core minisat/core/Main.cc)
 add_executable(minisat_simp minisat/simp/Main.cc)
+add_executable(php php/php.cc)
+
+target_include_directories(php PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/>
+  $<INSTALL_INTERFACE:include>  # <prefix>/include
+)
 
 if(STATIC_BINARIES)
   target_link_libraries(minisat_core minisat-lib-static)
   target_link_libraries(minisat_simp minisat-lib-static)
+  target_link_libraries(php minisat-lib-static)
 else()
   target_link_libraries(minisat_core minisat-lib-shared)
   target_link_libraries(minisat_simp minisat-lib-shared)
+  target_link_libraries(php minisat-lib-shared)
 endif()
 
 set_target_properties(minisat-lib-static PROPERTIES OUTPUT_NAME "minisat")
