@@ -19,18 +19,16 @@
 //    (!v_1_2 or !v_2_2) and (!v_1_2 or !v_3_2) and (!v_2_2 or !v_3_2)
 // ********************************************************************
 
-
-
 #include <stdlib.h>
 #include <stdio.h>
 
 //#include "minisat/core/Solver.h"
-#include "../extavy/minisat/utils/System.h"
-#include "../extavy/minisat/core/Solver.h"
+#include "minisat/utils/System.h"
+#include "minisat/core/Solver.h"
 
 int main(int argc, char** argv) {
 
-  if (argc != 2)
+  if (argc < 2)
     exit(1);
 
   int n = atoi(argv[1]);
@@ -66,6 +64,7 @@ int main(int argc, char** argv) {
   double initial_time = Minisat::cpuTime();
 
   s.toDimacs("cnf.cnf");
+  if (argc > 2) exit(1);
   bool res = s.solve();
 
   if (res) printf("This cannot be!\n");
