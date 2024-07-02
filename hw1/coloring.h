@@ -76,7 +76,24 @@ public:
     void addOneColorConstraints(int node) {
         assert (node < m_graph.getNumberOfNodes());
 
-        // Add your code here
+        Minisat::vec<Minisat::Lit> clause;
+
+        // Ensure at least one color is selected
+        for (int color = 0; color < m_nNumberOfColors; color++)
+            clause.push(Minisat::mkLit(getNodeHasColorVar(node, color)));
+        m_solver.addClause(clause);
+
+        clause.clear();
+
+        // Ensure at most one color is selected
+        for (int c1 = 0; c1 < m_nNumberOfColors; c1++)
+            for (int c2 = 0; c2 < c1; c2++)
+            {
+                clause.push(Minisat::mkLit(getNodeHasColorVar(node, c1), true));
+                clause.push(Minisat::mkLit(getNodeHasColorVar(node, c2), true));
+                m_solver.addClause(clause);
+                clause.clear();
+            }
     }
 
     void addEdgeColoringConstraints(int n1, int n2) {
@@ -84,7 +101,16 @@ public:
                 n2 < m_graph.getNumberOfNodes());
         assert (n1 <= n2);
 
-        // Add your code here
+        Minisat::vec<Minisat::Lit> clause;
+
+        // Ensure n1 and n2 are colored with the same color
+        for (int color = 0; color < m_nNumberOfColors; color++)
+        {
+            clause.push(Minisat::mkLit(getNodeHasColorVar(n1, color), true));
+            clause.push(Minisat::mkLit(getNodeHasColorVar(n2, color), true));
+            m_solver.addClause(clause);
+            clause.clear();
+        }
 
     }
 
@@ -127,7 +153,32 @@ public:
             }
         }
 
-        // Add your code here
+        const int nVars = m_solver.nVars(), nNodes = m_graph.getNumberOfNodes();
+        vector<Minisat::lbool> assignment;
+        Minisat::vec<Minisat::Lit> clause;
+
+        while (m_solver.solve())
+        {
+            // Add recent assignment to 'allColoring'
+            for (int v = 0; v < nVars; v++)
+                assignment.push_back(m_solver.modelValue(v));
+            allColoring.push_back(assignment);
+
+            // Add a refinement clause removing 'assignment' from solution space.
+            for (int node = 0; node < nNodes; node++)
+                for (int color = 0; color < m_nNumberOfColors; color++)
+                {
+                    Minisat::Var v = getNodeHasColorVar(node, color);
+                    if (m_solver.modelValue(v) == Minisat::l_True)
+                    {
+                        clause.push(Minisat::mkLit(v, true));
+                        break;
+                    }
+                }
+            m_solver.addClause(clause);
+            clause.clear(), assignment.clear();
+            assert(m_solver.nVars() == nVars);
+        }
     }
 
 private:
