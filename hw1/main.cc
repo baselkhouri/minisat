@@ -11,15 +11,17 @@ int main()
     printf("The k-coloring problem\n");
     printf("\n====================================================\n\n\n");
 
-    int k = 2; // The number of colors
+    int k = 5; // The number of colors
 
     // Create a graph with 3 nodes.
-    Graph g(3);
+    Graph g(4);
 
     // Add edges to the graph - this is a simple triangle.
     g.addEdge(0,1);
-    g.addEdge(0,2);
     g.addEdge(1,2);
+    g.addEdge(2,3);
+    g.addEdge(0,3);
+
     
     // Model the problem for k.
     Coloring c(g, k);
@@ -28,7 +30,9 @@ int main()
     bool bResult = c.isColorable();
 
     if (bResult) {
-        printf("\tThe graph is %d-colorable.\n\n", k);
+        vector<vector<Minisat::lbool>> allColorings;
+        c.givemeAllColoring(allColorings);
+        printf("\tThe graph is %d-colorable. Additionally, there are %ld possible colorings.\n\n", k, allColorings.size());
     }
     else {
         printf("\tNo %d-coloring is found!\n\n", k);
